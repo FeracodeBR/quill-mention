@@ -22,6 +22,7 @@ class Mention {
 
     this.options = {
       source: null,
+      renderItemTemplate: undefined,
       renderItem(item) {
         return `${item.value}`;
       },
@@ -214,7 +215,7 @@ class Mention {
 
   selectItem() {
     const data = this.getItemData();
-    this.options.onSelect(data, asyncData => {
+    this.options.onSelect({...data, item: this.values[data.index]}, asyncData => {
       this.insertItem(asyncData);
     });
     this.hideMentionList();
@@ -284,7 +285,11 @@ class Mention {
           ? this.options.listItemClass
           : "";
         li.dataset.index = i;
-        li.innerHTML = this.options.renderItem(data[i], searchTerm);
+        if (typeof this.options.renderItemTemplate === "function") {
+          this.options.renderItemTemplate(li, data[i], searchTerm, mentionChar);
+        } else {
+          li.innerHTML = this.options.renderItem(data[i], searchTerm, mentionChar);
+        }
         li.onmouseenter = this.onItemMouseEnter.bind(this);
         li.dataset.denotationChar = mentionChar;
         li.onclick = this.onItemClick.bind(this);
